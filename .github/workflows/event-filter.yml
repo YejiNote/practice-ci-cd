@@ -1,0 +1,92 @@
+name: 03. Event Filters Demo
+
+on:
+  push:
+    branches: [main, develop]
+    paths: -"src/**"
+      -"!docs/**"
+
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+
+  workflow_dispatch:
+
+jobs:
+  event-info:
+    name: 이벤트 정보 출력
+    runs-on: ubuntu-latest
+
+  branch-specific:
+    name: 브랜치별 동작
+    runs-on: ubuntu-latest
+    needs: event-info
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@4
+
+        # main 브랜치 전용
+      - name: Main branch actions
+        if: github.ref_name == 'main'
+        run: |
+          echo "메인 브랜치 전용 작업"
+
+        # develop 브랜치 전용
+      - name: Develop branch actions
+        if: github.ref_name == 'develop'
+        run: |
+          echo "🔧 Develop 브랜치 전용 작업"
+
+  event-type-handling:
+    name: 이벤트 타입별 처리
+    runs-on: ubuntu-latest
+    needs: event-info
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Handle push event
+        if: github.event_name == 'push'
+        run: |
+          echo "📤 Push 이벤트 처리"
+          echo "커밋 메시지: ${{ github.event.head_commit.message }}"
+          echo "커밋 작성자: ${{ github.event.head_commit.author.name }}"
+
+          # Pull Request 이벤트 처리
+      - name: Handle pull request event
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📝 Pull Request 이벤트 처리"
+          echo "PR 번호: ${{ github.event.pull_request.number }}"
+          echo "PR 제목: ${{ github.event.pull_request.title }}"
+          echo "PR 액션: ${{ github.event.action }}"
+
+    # 4. 조건부 작업 실행
+    conditional-tasks:
+      name: 조건부 작업 실행
+      runs-on: ubuntu-latest
+      needs: [event-info, branch-specific, event-type-handling]
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        # main 브랜치 + push 이벤트 시에만 실행
+        - name: Production deployment
+          if: github.ref_name == 'main' && github.event_name == 'push'
+          run: |
+            echo "🚀 Production 배포 실행"
+            echo "메인 브랜치에 푸시되어 배포를 시작합니다"
+
+        # Pull Request + main 브랜치 시에만 실행
+        - name: PR review checks
+          if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+          run: |
+            echo "🔍 Main 브랜치 PR 리뷰 체크"
+            echo "코드 리뷰 요구사항 확인 중..."
