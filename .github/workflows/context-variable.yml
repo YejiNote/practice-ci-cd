@@ -1,0 +1,87 @@
+name: 04. Context Variables Demo
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  basic-context:
+    name: 기본 Context 변수
+    runs-on: ubuntu-latest
+
+    step:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Github Context 출력하기
+        run: |
+          echo "=== Github Context 변수들 ==="
+          echo "저장소 이름: ${{ github.repository}}"
+          echo "브랜치 이름: ${{ github.ref_name}}"
+
+          echo "커밋해시 : ${{github.sha}}"
+          echo "이벤트 타입 : ${{github.event_name}}"
+          echo "실행자 : ${{github.actor}}"
+
+      - name: Runner Context 출력하기
+        run: |
+          echo "=== Runner Context 변수들 ==="
+          echo "운영체제: ${{ runner.os }}"
+          echo "작업 디렉토리: ${{ runner.workspace }}"
+
+  branch-specific:
+    name: 브랜치별 동작
+    runs-on: ubuntu-latest
+    needs: basic-context
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Main 브랜치 작업
+        if: github.ref_name == 'main'
+        run: |
+          echo "Main 브랜치에서 실행 중"
+          echo "이곳에서는 배포 작업을 합니다"
+
+      - name: Develop 브랜치 작업
+        if: github.ref_name == 'develop'
+        runs: |
+          echo "develop 브랜치에서 실행 중"
+          echo "이곳에서는 테스트 작업을 합니다"
+
+      - name: Feature 브랜치 작업
+        if: github.ref_name == 'feature'
+        runs: |
+          echo "이곳에서는 개발 작업을 합니다"
+
+  event-specific:
+    name: 이벤트별 동작
+    runs-on: ubuntu-latest
+    needs: basic-context
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@4
+
+      - name: Push 이벤트 처리
+        if: github.event_name == 'push'
+        run: |
+          echo "📤 Push 이벤트가 발생했습니다"
+          echo "커밋 메시지: ${{ github.event.head_commit.message }}"
+
+      - name: Pull Request 이벤트 처리
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📝 Pull Request 이벤트가 발생했습니다"
+          echo "PR 제목: ${{ github.event.pull_request.title }}"
+          echo "PR 번호: ${{ github.event.pull_request.number }}"
+
+      - name: 수동 실행 처리
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "👆 수동으로 실행했습니다"
+          echo "실행자: ${{ github.actor }}"
