@@ -44,3 +44,12 @@ jobs:
           echo "=== Job Level Environment Variables ==="
           echo "JOB_ENV: ${{ env.JOB_ENV }}"
           echo "NODE_ENV: ${{ env.NODE_ENV }}"
+
+       - name: Print secret (masked)
+        run: echo "MY_SECRET: ${{ secrets.MY_SECRET }}"
+
+      - name: Assign to env var and print
+        run: |
+          echo "MY_SECRET as env: $MY_SECRET"
+        env:
+          MY_SECRET: ${{ secrets.MY_SECRET }}
