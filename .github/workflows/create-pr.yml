@@ -1,18 +1,18 @@
 name: Automatically create PR
- 
+
 on:
   push:
     branches:
-      - main/*
- 
+      - main
+
 jobs:
   create-pr:
     runs-on: ubuntu-latest
- 
+
     steps:
       - name: Checkout Codes
         uses: actions/checkout@v3
- 
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
