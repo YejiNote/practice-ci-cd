@@ -1,55 +1,33 @@
-name: Environment Variables Exercise
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
 
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+  - name: Display GitHub context variables
+    run: |
+      echo "=== GitHub Context Variables ==="
+      echo "Repository: ${{ github.repository }}"
+      echo "SHA: ${{ github.sha }}"
+      echo "Ref: ${{ github.ref }}"
+      echo "Event: ${{ github.event_name }}"
 
-env:
-  # 워크플로 레벨 환경 변수
-  WORKFLOW_ENV: "workflow-level-variable"
-  APP_VERSION: "1.0.0"
+  - name: Display workflow level environment variables
+    run: |
+      echo "=== Workflow Level Environment Variables ==="
+      echo "WORKFLOW_ENV: ${{ env.WORKFLOW_ENV }}"
+      echo "APP_VERSION: ${{ env.APP_VERSION }}"
 
-jobs:
-  environment-variables-demo:
-    runs-on: ubuntu-latest
+  - name: Display job level environment variables
+    run: |
+      echo "=== Job Level Environment Variables ==="
+      echo "JOB_ENV: ${{ env.JOB_ENV }}"
+      echo "NODE_ENV: ${{ env.NODE_ENV }}"
 
+  - name: Print secret (masked)
+    run: |
+      echo "MY_SECRET: ${{ secrets.TEST_SECRET }}"
+
+  - name: Assign to env var and print
+    run: |
+      echo "MY_SECRET as env: $TEST_SECRET"
     env:
-      # 작업 레벨 환경 변수
-      JOB_ENV: "job-level-variable"
-      NODE_ENV: "production"
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Display GitHub context variables
-        run: |
-          echo "=== GitHub Context Variables ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "SHA: ${{ github.sha }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Event: ${{ github.event_name }}"
-
-      - name: Display workflow level environment variables
-        run: |
-          echo "=== Workflow Level Environment Variables ==="
-          echo "WORKFLOW_ENV: ${{ env.WORKFLOW_ENV }}"
-          echo "APP_VERSION: ${{ env.APP_VERSION }}"
-
-      - name: Display job level environment variables
-        run: |
-          echo "=== Job Level Environment Variables ==="
-          echo "JOB_ENV: ${{ env.JOB_ENV }}"
-          echo "NODE_ENV: ${{ env.NODE_ENV }}"
-
-       - name: Print secret (masked)
-        run: echo "MY_SECRET: ${{ secrets.MY_SECRET }}"
-
-      - name: Assign to env var and print
-        run: |
-          echo "MY_SECRET as env: $MY_SECRET"
-        env:
-          MY_SECRET: ${{ secrets.MY_SECRET }}
+      TEST_SECRET: ${{ secrets.TEST_SECRET }}
